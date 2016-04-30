@@ -1,0 +1,314 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>cloud9的个人博客</title>
+    <description>cloud9的博客
+</description>
+    <link>http://ninecloud.github.io/</link>
+    <atom:link href="http://ninecloud.github.io/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Sat, 30 Apr 2016 23:12:34 +0800</pubDate>
+    <lastBuildDate>Sat, 30 Apr 2016 23:12:34 +0800</lastBuildDate>
+    <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Java_web_字符编码总结</title>
+        <description>&lt;h2 id=&quot;section&quot;&gt;常见字符编码&lt;/h2&gt;
+
+&lt;h3 id=&quot;iso-8859-1&quot;&gt;iso-8859-1&lt;/h3&gt;
+&lt;p&gt;早期编码，单字节编码， 表示范围0-255， 比如0x61(97)表示a ; 所以只能用来表示英文字符&lt;/p&gt;
+
+&lt;h3 id=&quot;gb2312&quot;&gt;gb2312&lt;/h3&gt;
+&lt;p&gt;汉字编码，2字节，表示范围0-65535，兼容iso-8859-1，英文还是单字节，汉字是2字节，只能表示 简体中文&lt;/p&gt;
+
+&lt;h3 id=&quot;gbk&quot;&gt;gbk&lt;/h3&gt;
+&lt;p&gt;汉字编码，兼容gb2312，可以表示 繁体中文&lt;/p&gt;
+
+&lt;h3 id=&quot;unicodeutf8-utf16-utf32-utf16&quot;&gt;unicode(编码格式分为utf8 utf16 utf32) utf16&lt;/h3&gt;
+&lt;p&gt;表示世界上所有的文字，定长双字节，不兼容iso-8859-1，英文字符在前面加0x00&lt;/p&gt;
+
+&lt;h3 id=&quot;utf8&quot;&gt;utf8&lt;/h3&gt;
+&lt;p&gt;变长编码，兼容iso-8859-1，英文还是单字节，汉字一般是3个字节&lt;/p&gt;
+
+&lt;h2 id=&quot;http&quot;&gt;HTTP请求编码&lt;/h2&gt;
+
+&lt;h3 id=&quot;get&quot;&gt;GET&lt;/h3&gt;
+&lt;p&gt;GET请求会显示在浏览器的地址栏，如果有中文，会被浏览器编码(URLEncode)，编码后每个字节用%xy表示；&lt;/p&gt;
+
+&lt;p&gt;浏览器如何对中文编码(utf8还是gb2312), 我们没法控制，根据浏览器的设置；&lt;/p&gt;
+
+&lt;p&gt;所以，一般我们都用js主动URLEncode，这样浏览器就不会动了，自己可以控制。&lt;/p&gt;
+
+&lt;h3 id=&quot;post&quot;&gt;POST&lt;/h3&gt;
+&lt;p&gt;POST也会编码，我们可以用 contextType中的charset控制编码方式；&lt;/p&gt;
+
+&lt;h2 id=&quot;java&quot;&gt;JAVA对编码的处理&lt;/h2&gt;
+
+&lt;h3 id=&quot;class--&quot;&gt;class文件 和 运行时&lt;/h3&gt;
+&lt;p&gt;class文件的编码是utf8；&lt;/p&gt;
+
+&lt;p&gt;运行时系统一律用unicode(默认是UTF-16LE)编码；&lt;/p&gt;
+
+&lt;p&gt;所以，JAVA中char是2个字节；&lt;/p&gt;
+
+&lt;p&gt;JVM中所有的String都是unicode编码的，不存在gb2312编码、utf8编码等等&lt;/p&gt;
+
+&lt;h3 id=&quot;byte-getbytescharset&quot;&gt;byte[] getBytes(charset);&lt;/h3&gt;
+&lt;p&gt;String提供的方法，把内存中unicode编码的String 转化成(encode) 指定的charset；&lt;/p&gt;
+
+&lt;p&gt;比如 “aaaa”.getBytes(“utf8”);&lt;/p&gt;
+
+&lt;h3 id=&quot;new-stringbyte-bys-charset&quot;&gt;new String(byte[] bys, charset);&lt;/h3&gt;
+&lt;p&gt;解析字节流bys，当做我们指定的charset来解析，转化成(decode) unicode到JVM里，就是String了;&lt;/p&gt;
+
+&lt;p&gt;比如 new String(bys, “utf8”);&lt;/p&gt;
+
+&lt;h3 id=&quot;setcharacterencodingcharset&quot;&gt;setCharacterEncoding(“指定charset”)&lt;/h3&gt;
+&lt;p&gt;只对POST有效，GET无效；&lt;/p&gt;
+
+&lt;p&gt;必须在getParameter()前调用&lt;/p&gt;
+
+&lt;h3 id=&quot;section-1&quot;&gt;乱码原因及常见处理&lt;/h3&gt;
+&lt;p&gt;一般是 浏览器以GBK编码请求，传输到后端，后端错误的以iso-8859-1来解析了(这是默认的方式)&lt;/p&gt;
+
+&lt;p&gt;由于iso-8859-1是单字节，所以转成unicode，就是1个iso-8859-1变成1个unicode(前面加0x00)，没有丢信息，但是不是我们想要的；&lt;/p&gt;
+
+&lt;p&gt;所以我们得转回来&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;先把String转回字节流原样，byte[] src = s.getBytes(“iso-8859-1”); 因为iso-8859-1没丢信息，所以能还原;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;再把原样字节流按照gbk来解析，存到String，String rightStr = new String(src, “gbk”);&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;section-2&quot;&gt;代码验证&lt;/h2&gt;
+
+&lt;h3 id=&quot;section-3&quot;&gt;代码如下&lt;/h3&gt;
+&lt;hr /&gt;
+&lt;p&gt;public class CharsetTest {
+    private final static char[] HEX = “0123456789abcdef”.toCharArray();&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public static void main(String[] args) throws UnsupportedEncodingException {
+    String s = &quot;中国&quot;;
+    byte[] bytesGb2312 = s.getBytes(&quot;gb2312&quot;);
+    System.out.println(&quot;中国gb2312字节流: &quot; + bytes2HexString(bytesGb2312));
+    String stringAsIso8859 = new String(bytesGb2312, &quot;iso-8859-1&quot;);
+    System.out.println(&quot;stringAsIso8859: &quot; + stringAsIso8859);
+    System.out.println(&quot;length: &quot; + stringAsIso8859.length());
+    System.out.println(&quot;字节流: &quot; + bytes2HexString(stringAsIso8859.getBytes(&quot;unicode&quot;)));
+    System.out.println(&quot;换回去&quot;);
+    byte[] byteSrc = stringAsIso8859.getBytes(&quot;iso-8859-1&quot;);
+    System.out.println(&quot;原样字节流: &quot; + bytes2HexString(byteSrc));
+    String stringSrc = new String(byteSrc, &quot;gb2312&quot;);
+    System.out.println(&quot;还原后String: &quot; + stringSrc);
+    System.out.println(&quot;length: &quot; + stringSrc.length());
+
+}
+
+public static String bytes2HexString(byte[] bys) {
+    char[] chs = new char[bys.length * 2 + bys.length - 1];
+    for (int i = 0, offset = 0; i &amp;lt; bys.length; i++) {
+        if (i &amp;gt; 0) {
+            chs[offset++] = &#39; &#39;;
+
+        }
+        chs[offset++] = HEX[bys[i] &amp;gt;&amp;gt; 4 &amp;amp; 0xf];
+        chs[offset++] = HEX[bys[i] &amp;amp; 0xf];
+
+    }
+    return new String(chs);
+
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;}&lt;/p&gt;
+
+&lt;h3 id=&quot;section-4&quot;&gt;程序输出及解释&lt;/h3&gt;
+&lt;p&gt;中国gb2312字节流: d6 d0 b9 fa               // 中国gb2312编码是4个字节&lt;/p&gt;
+
+&lt;p&gt;stringAsIso8859: ÖÐ¹ú                       // 直接按iso-8859-1解码之后，是乱码，让我们看看，解成啥了&lt;/p&gt;
+
+&lt;p&gt;length: 4                                   // 长度是4个字节&lt;/p&gt;
+
+&lt;p&gt;字节流: fe ff 00 d6 00 d0 00 b9 00 fa       // feff是BOM 大端字节序；很显然按iso-8859-1解析转成unicode，变成了&lt;/p&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;                                        // 8个字节，每个子节前加0x00  
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;换回去&lt;/p&gt;
+
+&lt;p&gt;原样字节流: d6 d0 b9 fa                     // 把String按照iso-8859-1编码，还原成原样&lt;/p&gt;
+
+&lt;p&gt;还原后String: 中国                          // 再把字节流按gb2312来解析成String，就是我们想要的了&lt;/p&gt;
+
+&lt;p&gt;length: 2&lt;/p&gt;
+
+</description>
+        <pubDate>Sat, 30 Apr 2016 00:00:00 +0800</pubDate>
+        <link>http://ninecloud.github.io/2016/04/30/JAVA_WEB_%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E6%80%BB%E7%BB%93.html</link>
+        <guid isPermaLink="true">http://ninecloud.github.io/2016/04/30/JAVA_WEB_%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E6%80%BB%E7%BB%93.html</guid>
+        
+        <category>演讲稿</category>
+        
+        
+        <category>技术</category>
+        
+      </item>
+    
+      <item>
+        <title>把时间当做朋友读后感</title>
+        <description>&lt;h2 id=&quot;section&quot;&gt;最近读了几本书，《暗时间》、《进化心理学》、《像外行一样思考，像专家一样实践》、《把时间当做朋友》。主要涉及认知科学、心智成熟、时间管理等方面，结合工作，有一些感想。&lt;/h2&gt;
+
+&lt;h2 id=&quot;section-1&quot;&gt;科学方法&lt;/h2&gt;
+&lt;p&gt;### 学习能力是最重要的能力，他是我们的元能力，帮助我们获得更多的能力。了解自己的大脑，了解自己的心理机制，才能更好地利用他为自己服务，帮助自己完成自己想要做的事情。&lt;/p&gt;
+
+&lt;h2 id=&quot;section-2&quot;&gt;元能力&lt;/h2&gt;
+&lt;p&gt;### 元能力、元认知，需要深入思考一下，往更深处思考，这个世界的很多方法都是相通的。比如，学习一门技术、做一个项目，深层思路是一致的，都要从深层考虑，现状是什么、要解决什么问题、如何去解决、有没有别的更好的办法解决 等等。学习编程语言，会有些语言有“自省“能力，模块设计讲究抽象层级，这些都是深层思考。最近和一个做项目管理的同事交流，发现她的思路也是和我们做项目相通，第一步先建立模型，抽象出一个组所有的项目所处的不同阶段、每个阶段耗费的时间、每个项目投入的人力等等元数据框架；第二步开始收集数据；第三步，根据收集的数据，量化图标，分析出问题的原因所在(比如：究竟时间都花费在哪了，是返工太多、还是插入事情太多 等等)；第四步，制定解决方案；第五步，继续观察效果。&lt;/p&gt;
+
+&lt;h2 id=&quot;section-3&quot;&gt;心智力量&lt;/h2&gt;
+&lt;p&gt;认识自己的大脑，试着去接受一些”难以接受“的现实，比如：资源分布是不均匀的、运气是我们无法控制的、明天的时间和金钱并不会变多、随着年龄增长时间会越来越快、人类大脑并不擅长做逻辑推演 等等。心智力量是一个人最重要的品质，他的开启需要的是一念起之后长期刻意的训练。举个例子，如何用心智力量提高做事效率？人类会不自觉地”避重就轻“，工作的时候很自然地会刻意回避”较难”的事情，花大量的时间在简单地事情上。哪些是“较难”的事情，往往是哪些让我们觉得枯燥、无聊、不想做的那些。比如：码农的工作，编码实现是简单的事情，“较难”的事情是反思方案的不合理之处，为什么要这么设计，为了解决什么问题，这样解决的好吗，有没有更好的方法？&lt;/p&gt;
+
+&lt;h2 id=&quot;section-4&quot;&gt;纸上推演&lt;/h2&gt;
+&lt;p&gt;人类大脑就像内存一样，能记忆的东西有限，而且容易遗忘，做大任务处理的时候，我们要学习计算机，找一块“硬盘”把中间的详情数据“存储”起来，而不是全在“内存”里暂存。
+在纸上推演有几个好处：
+* 纸上可以记录更多大脑里无法暂存的细节，帮助完成大任务的处理
+* 脑子里想，和把信息以文字、图表等形式序列化到纸上，是2种不同的思考，后者更容易发现推理中的漏洞
+* 纸上推演可以看清楚自己思维的每一个步骤，帮助自己“反思”，找出改进点&lt;/p&gt;
+
+&lt;h2 id=&quot;section-5&quot;&gt;作息调整&lt;/h2&gt;
+&lt;p&gt;最近在调整作息，每天争取23:30之前睡觉，7:30之前起床，经历了将近一周之后，白天的精神明显变好了，地铁上不会困的流泪，上午不会感觉疲惫了，甚至连口渴的症状都好像缓解了。如此，应该坚持下去，致力于早睡早起。&lt;/p&gt;
+</description>
+        <pubDate>Thu, 17 Mar 2016 00:00:00 +0800</pubDate>
+        <link>http://ninecloud.github.io/2016/03/17/%E6%8A%8A%E6%97%B6%E9%97%B4%E5%BD%93%E5%81%9A%E6%9C%8B%E5%8F%8B%E8%AF%BB%E5%90%8E%E6%84%9F.html</link>
+        <guid isPermaLink="true">http://ninecloud.github.io/2016/03/17/%E6%8A%8A%E6%97%B6%E9%97%B4%E5%BD%93%E5%81%9A%E6%9C%8B%E5%8F%8B%E8%AF%BB%E5%90%8E%E6%84%9F.html</guid>
+        
+        <category>心智 认知科学 元能力</category>
+        
+        
+        <category>读书</category>
+        
+      </item>
+    
+      <item>
+        <title>春节有感</title>
+        <description>&lt;h2 id=&quot;section&quot;&gt;年龄阅历增长了，现在忽然深刻理解了小市侩心理，为此感到深深悲哀的同时，也想记录一下以自勉，反省一下自己有没有类似的问题。&lt;/h2&gt;
+
+&lt;h3 id=&quot;section-1&quot;&gt;老人的逝去&lt;/h3&gt;
+&lt;p&gt;人生倏忽兮如白驹之过隙，70多岁对老人也是一个大坎，今年回家听说有两位70多的老人去世了，还有一位躺下了，跟我还算是同宗吧，他是第五代，我是第七代。工业化对社会产生剧烈影响，虽是同族，也早就没有了亲人的感觉。想着曾经眼前的人，看一眼少一眼，也许就是最后一眼，不由得感伤。&lt;/p&gt;
+
+&lt;h3 id=&quot;section-2&quot;&gt;生儿生女不一样&lt;/h3&gt;
+&lt;p&gt;一直觉得农村重男轻女的思想是愚昧落后，可今年感受到了残酷的现实，老人生病将死时，儿子必须照顾陪床(不情愿也得干)、女儿不必(不想干就可以赖掉)。老人生病住院儿女凑钱，女儿不给，老人去世发丧，女儿女婿不出钱，寿衣不给买，棺盖买了之后又后悔(本以为100就够了，没想到花了300，在大路上嘟嘟囔囔)。&lt;/p&gt;
+
+&lt;h3 id=&quot;section-3&quot;&gt;有钱的老人和没钱的老人&lt;/h3&gt;
+&lt;ul&gt;
+  &lt;li&gt;先说没钱的老人，老年生活极其悲惨，前两年目睹了一个老人凄惨离世，老人只有一个女儿，没有儿子，女儿女婿负责给他送饭，把饭倒到他的碗里就走，不给刷碗，老人甚至没有水，只能用树叶子擦碗。&lt;/li&gt;
+  &lt;li&gt;有钱的老人，则成了兵家必争之地，八仙过海各显神通，所有的利益相关人(儿子、女儿、侄子及子节点)都使出解数争取自己的利益(尽管某些人已经很富有了)，每个人都觉得自己吃亏了，便宜谁占了呢？&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;section-4&quot;&gt;心胸狭隘&lt;/h3&gt;
+&lt;p&gt;自私的基因已经深入骨髓，需要克服。都说自己好，别人坏，其实自己又和比人有多大区别呢，同一个环境下生活的人，思维方式差异不大。有一个大娘想抱孙子，可是儿媳妇儿生了2个孙女，一旦听到别人家谁谁怀孕了，心情巨差了好几天。某某一旦听说别人家里(远去的陈年旧恨)发生点不好的事了，就幸灾乐祸。某人生的是女儿，看别人生儿子就不开心，不管那人是自己的近亲，对自己赤城。&lt;/p&gt;
+
+&lt;h3 id=&quot;section-5&quot;&gt;改变别人不可能&lt;/h3&gt;
+&lt;p&gt;时代发展快，父母和儿女的代沟太大，谁都无法改变对方的思想，不如放弃，不要以爱的名义来强行灌输对方自己的意志。&lt;/p&gt;
+</description>
+        <pubDate>Wed, 10 Feb 2016 00:00:00 +0800</pubDate>
+        <link>http://ninecloud.github.io/2016/02/10/%E6%98%A5%E8%8A%82%E6%9C%89%E6%84%9F.html</link>
+        <guid isPermaLink="true">http://ninecloud.github.io/2016/02/10/%E6%98%A5%E8%8A%82%E6%9C%89%E6%84%9F.html</guid>
+        
+        <category>人心 环境</category>
+        
+        
+        <category>杂项</category>
+        
+      </item>
+    
+      <item>
+        <title>读民国史</title>
+        <description>&lt;h2 id=&quot;section&quot;&gt;历史深处的民国&lt;/h2&gt;
+&lt;p&gt;这本书2015年11月份就想读了，最近刚有机会读上，我对近代史一直所知甚少，可能小时候一直觉得近代史是一部屈辱史，内心一直不愿意接受，现在想来，这还是挺幼稚的想法。年龄大了，阅历丰富了，读历史也有了不同的感悟，晚清民国到建国，这一段历史可以说风云变幻，人物事件众多、环境复杂多变，乱世确也造就了很多英雄。&lt;/p&gt;
+
+&lt;h3 id=&quot;section-1&quot;&gt;历史人物不是那么简单&lt;/h3&gt;
+&lt;p&gt;小时候的历史教科书，把人物事件说的太过简单，现在想来，简单的脸谱化的历史，肯定是虚假的不可信的历史。比如袁世凯、北洋军阀，教科书上说袁世凯出卖了谭嗣同，使戊戌六君子喋血菜市口，康梁代表正义，袁世凯代表了邪恶。曾国藩镇压太平天国起义，李鸿章签订卖国条约，北洋军阀祸国殃民，蒋介石消极抗日积极反共……
+袁世凯早年在朝鲜打仗初露锋芒，后来在天津小站练兵，中原混战的军阀们几乎都是袁世凯的小弟；康梁一介书生，没有什么经验，戊戌变法操之过急，康有为甚至伪造光绪衣带诏；太平天国的洪秀全就是个流氓；曾国藩被成为圣人，晚清中兴明臣，使清朝延续了60年；李鸿章谈判马关条约时，被日本愤青枪击，谈判辛丑条约时已经70多岁，才用拖延战术，前后谈了一年多，数次在谈判桌上吐血，骂他汉奸的人又在做什么呢；蒋介石的军事政治能力，培养黄埔学生、平定陈炯明叛乱、北伐中原都是明证…&lt;/p&gt;
+
+&lt;h3 id=&quot;section-2&quot;&gt;博弈能力&lt;/h3&gt;
+&lt;p&gt;围棋包含着中华的传统文化、智慧，对弈、博弈，局势永远都没有那么差，我们需要提高的就是博弈能力。段祺瑞小时候吃不饱饭，曾经一路讨饭1000多公里，蒋介石年轻时辗转去了日本军校，在军校里受尽苦头，孙中山一辈子都在失败，又一次次的站起来…
+风云变幻的年代，有太多这样的事情。
+再比如德国，一战是战败国，背负赔款200多亿美元，中国近代以来所有的赔款加起来，也不足其十分之一，可是德国仅用了20年，就又发动了二战，这么差得局势，怎么做到的呢？
+原来，德国从美国贷款，在国内发展经济，赚钱之后再还款；1918年战败，到1933年希特勒上台，德国共贷款50多亿美元，只还款20多亿美元，之后拒绝还款，虽然有点流氓，但也总算是翻盘了，中国晚清开始用了100年也没做到。&lt;/p&gt;
+</description>
+        <pubDate>Tue, 19 Jan 2016 00:00:00 +0800</pubDate>
+        <link>http://ninecloud.github.io/2016/01/19/%E8%AF%BB%E6%B0%91%E5%9B%BD%E5%8F%B2.html</link>
+        <guid isPermaLink="true">http://ninecloud.github.io/2016/01/19/%E8%AF%BB%E6%B0%91%E5%9B%BD%E5%8F%B2.html</guid>
+        
+        <category>读历史</category>
+        
+        
+        <category>读书</category>
+        
+      </item>
+    
+      <item>
+        <title>Year End Summary</title>
+        <description>&lt;h2 id=&quot;section&quot;&gt;2015年末&lt;/h2&gt;
+&lt;p&gt;不得不说，时间太快了，来到去哪儿已经8个月，搬到新家已经6个月，先回顾下今年大概做了什么吧&lt;/p&gt;
+
+&lt;h3 id=&quot;section-1&quot;&gt;生活&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;减肥12kg左右，初步养成了锻炼身体的习惯，明年继续努力，争取再减5kg&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;开始旅行了(第一次做了飞机)，大连、杭州、宁夏，旅行真的可以增长见闻，人需要输入不同的东西，多看、多听、多想&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;开始感受生活，不像以前一样只顾工作，生活自有他的美好。我开始租了4K月租的房子、买1K以上的鞋子、买1K以上的耳机，渐渐懂得金钱只是工具，让自己可以做想做的事情。所以，努力挣钱，而不要做金钱的奴隶，如果将来自己有钱了，不要做金钱的努力，TA的存在，只是能帮助我更快DE更方便的完成自己的理想。&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;section-2&quot;&gt;技术&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;对技术有了新的理解，虚心一些，不是去年读了一些书，就能如何了，还差的很远；多看书、多看牛人博客、多动手开发实践；比如看到有些牛人研究生期间读了300多本技术书，我现在可能是在30-50本这个级别吧，继续努力，吾生也有涯，而知也无涯&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;刚到qunar的时候，觉得去年学的技术无用武之地，觉得乱糟糟的业务，没有什么可做的，没有可提高的空间。半年过去了，我知道自己错了，一花一世界，任何看似简单的事情，想做好，都需要从细节上下工夫；太祖长拳，到了乔峰手里，就是绝世武功； 把复杂的业务思考清楚、说清楚、用代码实现，如何把代码写的优雅可读，性能问题、如何监控、遇错如何处理 等等这些在任何一个简单的需求中都会有体现； 就像简单的太祖长拳，谁都会打，但是乔峰的每一拳，都附加上了自己对武学的理解，他就可以后发先至，他就可以打的对手特别被动，我想那是因为他站在了更高的维度吧。&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;技术很需要想象力，努力用技术去解决生活中遇到的问题，首先要多体验生活，想想能不能通过技术解决。比如去哪儿，最初只是做一个机票的购买入口，提供比价功能，帮人来做价格筛选的工作；比如最近接触的2个mac工具，zsh和alfred，极大地方便了电脑的操作，我这种没有想象力的人，就根本想不到这种东西。&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;section-3&quot;&gt;精神修炼&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;开始阅读计算机技术之外的书籍，人类简史、极简欧洲史、上帝掷骰子吗、西游漫注 等等人文历史、科普类的书，明年再广泛涉猎一些小说类的东西，目前想读的有王小波全集、冯唐的书&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;试着放下俗念、执念，像西游漫注里说的，圣人是境随心转；让自己更美好、更快乐，环境会随着自己的内心转变的；不要负能量，不要怨气冲天，不要埋怨自己的出身，不要做金钱美女一大堆等低俗的幻想；我既然是人，就不该想禽兽一样思考。&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;section-4&quot;&gt;明年展望&lt;/h2&gt;
+&lt;p&gt;努力让自己更美好吧，读书、生活、学习，让自己开心，让周围的亲人、朋友开心，生命是如此的短暂。&lt;/p&gt;
+</description>
+        <pubDate>Thu, 31 Dec 2015 00:00:00 +0800</pubDate>
+        <link>http://ninecloud.github.io/2015/12/31/year-end-summary.html</link>
+        <guid isPermaLink="true">http://ninecloud.github.io/2015/12/31/year-end-summary.html</guid>
+        
+        <category>年终总结</category>
+        
+        
+        <category>总结</category>
+        
+      </item>
+    
+  </channel>
+</rss>
