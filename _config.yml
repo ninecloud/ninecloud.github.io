@@ -27,9 +27,9 @@ favicon: http://7u2ho6.com1.z0.glb.clouddn.com/site-favicon.ico
 #  shortname: suyan-zh
 
 # google analytics 设置
-ga:
-  id: UA-54767140-1
-  url: ninecloud.github.io
+# ga:
+#  id: UA-54767140-1
+#  url: ninecloud.github.io
 
 # Build settings
 permalink: /:year/:month/:day/:title.html
