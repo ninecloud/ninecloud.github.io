@@ -6,9 +6,84 @@
 </description>
     <link>http://ninecloud.github.io/</link>
     <atom:link href="http://ninecloud.github.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sat, 30 Apr 2016 23:12:34 +0800</pubDate>
-    <lastBuildDate>Sat, 30 Apr 2016 23:12:34 +0800</lastBuildDate>
+    <pubDate>Tue, 03 May 2016 13:49:28 +0800</pubDate>
+    <lastBuildDate>Tue, 03 May 2016 13:49:28 +0800</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Https原理梳理</title>
+        <description>&lt;h2 id=&quot;https&quot;&gt;https原理&lt;/h2&gt;
+&lt;p&gt;总结起来三句话&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;有了server的公钥，可以相信server了(怎么相信公钥?)&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;有了CA颁发的证书，可以相信server的公钥了(怎么相信CA?)&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;CA中心是有限，CA的公钥存在client就可以了&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;httpsserver&quot;&gt;https解决了如何相信server的问题&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;有了https，client可以相信server了，中间人无法冒充server、无法篡改信息、无法监听信息&lt;/li&gt;
+  &lt;li&gt;server如何相信client呢？业务层自己想办法认证吧&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;section&quot;&gt;公钥秘钥是怎么工作的&lt;/h2&gt;
+
+&lt;h3 id=&quot;client---server&quot;&gt;client -&amp;gt; server&lt;/h3&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;client的信息用公钥加密，只有server用秘钥才能解密读取，这个过程不复杂&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h3 id=&quot;server---client&quot;&gt;server -&amp;gt; client&lt;/h3&gt;
+
+&lt;h4 id=&quot;server&quot;&gt;server的工作&lt;/h4&gt;
+&lt;ul&gt;
+  &lt;li&gt;server把要传的内容context，先用私钥加密成contextEncrypted&lt;/li&gt;
+  &lt;li&gt;server对contextEncrypted做hash，得到digest&lt;/li&gt;
+  &lt;li&gt;server对digest用私钥加密，得到signature&lt;/li&gt;
+  &lt;li&gt;server把信息(contextEncrypted + signature + CA颁发的数字证书) -&amp;gt; client&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;client&quot;&gt;client工作&lt;/h4&gt;
+&lt;ul&gt;
+  &lt;li&gt;client先用CA的公钥(本地存储，没毛病)，解密 CA颁发的数字证书，获取 server的公钥&lt;/li&gt;
+  &lt;li&gt;client用server的公钥解密signature，得到digest；可以相信，消息是server发来的&lt;/li&gt;
+  &lt;li&gt;client对contextEncrypted做hash，得到digestMyself，对比digest 和 digestMyself，可以相信信息 没篡改&lt;/li&gt;
+  &lt;li&gt;client用server的公钥解密contextEncrypted，得到context&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;section-1&quot;&gt;零碎知识&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;公钥秘钥那一套RSA算法，号称非对称加密，原理是大数相乘容易，但是因式分解很难&lt;/li&gt;
+  &lt;li&gt;非对称加密解密，太耗时，https不能一直这么玩，所以只在握手时用，握手中约定了回话私钥，本次会话内之后的交流，用这个私钥做对称加解密&lt;/li&gt;
+  &lt;li&gt;约定会话秘钥，用了3个伪随机数(前3次握手)，使之更接近真随机&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;section-2&quot;&gt;参考文章&lt;/h2&gt;
+&lt;ul&gt;
+  &lt;li&gt;&lt;a href=&quot;http://www.ruanyifeng.com/blog/2011/08/what_is_a_digital_signature.html&quot;&gt;数字签名&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://www.ruanyifeng.com/blog/2014/02/ssl_tls.html&quot;&gt;ssl协议&lt;/a&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;a href=&quot;http://www.ruanyifeng.com/blog/2014/09/illustration-ssl.html&quot;&gt;图解ssl协议&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+</description>
+        <pubDate>Tue, 03 May 2016 00:00:00 +0800</pubDate>
+        <link>http://ninecloud.github.io/2016/05/03/https%E5%8E%9F%E7%90%86%E6%A2%B3%E7%90%86.html</link>
+        <guid isPermaLink="true">http://ninecloud.github.io/2016/05/03/https%E5%8E%9F%E7%90%86%E6%A2%B3%E7%90%86.html</guid>
+        
+        <category>https</category>
+        
+        
+        <category>技术</category>
+        
+      </item>
     
       <item>
         <title>Java_web_字符编码总结</title>
@@ -86,73 +161,68 @@
 &lt;h2 id=&quot;section-2&quot;&gt;代码验证&lt;/h2&gt;
 
 &lt;h3 id=&quot;section-3&quot;&gt;代码如下&lt;/h3&gt;
-&lt;hr /&gt;
-&lt;p&gt;public class CharsetTest {
-    private final static char[] HEX = “0123456789abcdef”.toCharArray();&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;
+public class CharsetTest {
+    private final static char[] HEX = &quot;0123456789abcdef&quot;.toCharArray();
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;public static void main(String[] args) throws UnsupportedEncodingException {
-    String s = &quot;中国&quot;;
-    byte[] bytesGb2312 = s.getBytes(&quot;gb2312&quot;);
-    System.out.println(&quot;中国gb2312字节流: &quot; + bytes2HexString(bytesGb2312));
-    String stringAsIso8859 = new String(bytesGb2312, &quot;iso-8859-1&quot;);
-    System.out.println(&quot;stringAsIso8859: &quot; + stringAsIso8859);
-    System.out.println(&quot;length: &quot; + stringAsIso8859.length());
-    System.out.println(&quot;字节流: &quot; + bytes2HexString(stringAsIso8859.getBytes(&quot;unicode&quot;)));
-    System.out.println(&quot;换回去&quot;);
-    byte[] byteSrc = stringAsIso8859.getBytes(&quot;iso-8859-1&quot;);
-    System.out.println(&quot;原样字节流: &quot; + bytes2HexString(byteSrc));
-    String stringSrc = new String(byteSrc, &quot;gb2312&quot;);
-    System.out.println(&quot;还原后String: &quot; + stringSrc);
-    System.out.println(&quot;length: &quot; + stringSrc.length());
-
-}
-
-public static String bytes2HexString(byte[] bys) {
-    char[] chs = new char[bys.length * 2 + bys.length - 1];
-    for (int i = 0, offset = 0; i &amp;lt; bys.length; i++) {
-        if (i &amp;gt; 0) {
-            chs[offset++] = &#39; &#39;;
-
-        }
-        chs[offset++] = HEX[bys[i] &amp;gt;&amp;gt; 4 &amp;amp; 0xf];
-        chs[offset++] = HEX[bys[i] &amp;amp; 0xf];
+    public static void main(String[] args) throws UnsupportedEncodingException {
+        String s = &quot;中国&quot;;
+        byte[] bytesGb2312 = s.getBytes(&quot;gb2312&quot;);
+        System.out.println(&quot;中国gb2312字节流: &quot; + bytes2HexString(bytesGb2312));
+        String stringAsIso8859 = new String(bytesGb2312, &quot;iso-8859-1&quot;);
+        System.out.println(&quot;stringAsIso8859: &quot; + stringAsIso8859);
+        System.out.println(&quot;length: &quot; + stringAsIso8859.length());
+        System.out.println(&quot;字节流: &quot; + bytes2HexString(stringAsIso8859.getBytes(&quot;unicode&quot;)));
+        System.out.println(&quot;换回去&quot;);
+        byte[] byteSrc = stringAsIso8859.getBytes(&quot;iso-8859-1&quot;);
+        System.out.println(&quot;原样字节流: &quot; + bytes2HexString(byteSrc));
+        String stringSrc = new String(byteSrc, &quot;gb2312&quot;);
+        System.out.println(&quot;还原后String: &quot; + stringSrc);
+        System.out.println(&quot;length: &quot; + stringSrc.length());
 
     }
-    return new String(chs);
+
+    public static String bytes2HexString(byte[] bys) {
+        char[] chs = new char[bys.length * 2 + bys.length - 1];
+        for (int i = 0, offset = 0; i &amp;lt; bys.length; i++) {
+            if (i &amp;gt; 0) {
+                chs[offset++] = &#39; &#39;;
+
+            }
+            chs[offset++] = HEX[bys[i] &amp;gt;&amp;gt; 4 &amp;amp; 0xf];
+            chs[offset++] = HEX[bys[i] &amp;amp; 0xf];
+
+        }
+        return new String(chs);
+
+    }
 
 }
 &lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-
-&lt;p&gt;}&lt;/p&gt;
 
 &lt;h3 id=&quot;section-4&quot;&gt;程序输出及解释&lt;/h3&gt;
-&lt;p&gt;中国gb2312字节流: d6 d0 b9 fa               // 中国gb2312编码是4个字节&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;中国gb2312字节流: d6 d0 b9 fa&lt;/strong&gt;               &lt;em&gt;// 中国gb2312编码是4个字节&lt;/em&gt;&lt;/p&gt;
 
-&lt;p&gt;stringAsIso8859: ÖÐ¹ú                       // 直接按iso-8859-1解码之后，是乱码，让我们看看，解成啥了&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;stringAsIso8859: ÖÐ¹ú&lt;/strong&gt;                       &lt;em&gt;// 直接按iso-8859-1解码之后，是乱码，让我们看看，解成啥了&lt;/em&gt;&lt;/p&gt;
 
-&lt;p&gt;length: 4                                   // 长度是4个字节&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;length: 4&lt;/strong&gt;                                   &lt;em&gt;// 长度是4个字节&lt;/em&gt;&lt;/p&gt;
 
-&lt;p&gt;字节流: fe ff 00 d6 00 d0 00 b9 00 fa       // feff是BOM 大端字节序；很显然按iso-8859-1解析转成unicode，变成了&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;字节流: fe ff 00 d6 00 d0 00 b9 00 fa&lt;/strong&gt;       &lt;em&gt;// feff是BOM 大端字节序；很显然按iso-8859-1解析转成unicode，变成了8个字节，每个子节前加0x00&lt;/em&gt;&lt;/p&gt;
 
-&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;                                        // 8个字节，每个子节前加0x00  
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
+&lt;p&gt;&lt;strong&gt;换回去&lt;/strong&gt;&lt;/p&gt;
 
-&lt;p&gt;换回去&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;原样字节流: d6 d0 b9 fa&lt;/strong&gt;                     &lt;em&gt;// 把String按照iso-8859-1编码，还原成原样&lt;/em&gt;&lt;/p&gt;
 
-&lt;p&gt;原样字节流: d6 d0 b9 fa                     // 把String按照iso-8859-1编码，还原成原样&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;还原后String: 中国&lt;/strong&gt;                          &lt;em&gt;// 再把字节流按gb2312来解析成String，就是我们想要的了&lt;/em&gt;&lt;/p&gt;
 
-&lt;p&gt;还原后String: 中国                          // 再把字节流按gb2312来解析成String，就是我们想要的了&lt;/p&gt;
-
-&lt;p&gt;length: 2&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;length: 2&lt;/strong&gt;&lt;/p&gt;
 
 </description>
         <pubDate>Sat, 30 Apr 2016 00:00:00 +0800</pubDate>
         <link>http://ninecloud.github.io/2016/04/30/JAVA_WEB_%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E6%80%BB%E7%BB%93.html</link>
         <guid isPermaLink="true">http://ninecloud.github.io/2016/04/30/JAVA_WEB_%E5%AD%97%E7%AC%A6%E7%BC%96%E7%A0%81%E6%80%BB%E7%BB%93.html</guid>
         
-        <category>演讲稿</category>
+        <category>字符编码</category>
         
         
         <category>技术</category>
